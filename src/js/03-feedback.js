@@ -1,47 +1,45 @@
 import throttle from 'lodash.throttle';
 
-// Ключ локального сховища
-const STORAGE_KEY = 'feedback-form-state';
-
-const feedbackForm = document.querySelector('.feedback-form');
+// Створюмо змінні для доступу до елементів
+const form = document.querySelector('.feedback-form');
 const emailData = document.querySelector('[name="email"]');
 const messageData = document.querySelector('[name="message"]');
 
-// Об'єкт, куди ми отримуємо значеннями полів
-const formData = {
-   email: ' ',
-   message: ' '
-};
+// Ключ локального сховища
+const STORAGE_KEY = 'feedback-form-state';
 
-feedbackForm.addEventListener('submit', onFormSubmit);
-feedbackForm.addEventListener('input', throttle(onFormInput, 500));
-
+// Додаємо слухачів до елементів
+form.addEventListener('input', throttle(onFormInput, 500));
+form.addEventListener('submit', onFormSubmit);
 
 // Зберігаємо значення полів у локальному сховищу після вводу значень
-function onFormInput(e) {
-   formData[e.target.name] = e.target.value;
-   localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-   console.log(formData);
-}
+function onFormInput(){
+   const formData = {
+      email: emailData.value,
+      message: messageData.value
+   };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+};
 
-// Отримуємо значення збережених полів після перезавантаження сторінки
-function saveLocalStorage() {
-   const saveData = localStorage.getItem(STORAGE_KEY);
-   if (saveData) {
-      const saveValuesData = JSON.parse(saveData);
-      feedbackForm.elements.email.value = saveValuesData.email;
-      feedbackForm.elements.message.value = saveValuesData.message;
-   }
-}
-saveLocalStorage(); 
+// Очищуємо сховище і поля форми після submit, виводимо у консоль значення полів.
+function onFormSubmit(e){
+  e.preventDefault();
 
-// очищуємо сховище і поля форми після submit, виводимо у консоль значення полів.
-function onFormSubmit(e) {
-   e.preventDefault();
-   if (emailData.value && messageData.value) {
+  if (emailData.value && messageData.value) {
     console.log(JSON.parse(localStorage.getItem(STORAGE_KEY)));
     e.currentTarget.reset();
     localStorage.removeItem(STORAGE_KEY);
+  }
+};
+
+// Отримуємо значення збережених полів після перезавантаження сторінки
+function saveLocalStorage() {
+  const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+   if (savedData.email) {
+      emailData.value = savedData.email || {};
+   }
+   if (savedData.message) {
+      messageData.value = savedData.message || {};
    }
 }
-
+saveLocalStorage();
